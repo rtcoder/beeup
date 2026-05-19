@@ -1,4 +1,4 @@
-# Task: Add Create Custom Post Flow
+# Task: Add Create Custom Post Flow [done]
 
 ## Goal
 
@@ -18,4 +18,11 @@ Allow the app to create a Bee Up! Reddit custom post.
 
 ## Status
 
-Open.
+Done in current MVP.
+
+## Notes
+
+- Added `src/server/core/post.ts` with `reddit.submitCustomPost`.
+- Added a subreddit moderator menu item to create a Bee Up! post.
+- Added `/internal/menu/post-create` on the Devvit/Hono server.
+- Included `postData.version` and old Reddit text fallback.

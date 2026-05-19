@@ -41,10 +41,12 @@ The game uses a fixed internal playfield of `390 x 700` and scales the canvas re
 
 ```bash
 npm install
-npm run dev
+npm run dev        # Devvit playtest; requires Reddit CLI authentication
+npm run dev:local  # Local Vite preview for quick browser iteration
 npm run build
 npm run lint
 npm run typecheck
+npm run login
 ```
 
 ## Project Structure
@@ -63,4 +65,14 @@ src/
 tasks/
 ```
 
-Devvit integration is still pending; the current app runs as a local Vite prototype.
+## Devvit
+
+The project includes a Devvit Web configuration:
+
+- `devvit.json` defines the custom post entrypoint at `dist/client/game.html`.
+- `src/client/game.html` is the Devvit/Vite HTML entrypoint for the React game.
+- `src/server/index.ts` starts a Hono server through Devvit Web.
+- `src/server/core/post.ts` creates a Bee Up! custom post through `reddit.submitCustomPost`.
+- The subreddit menu item `Create Bee Up! post` calls `/internal/menu/post-create`.
+
+`npm run dev` starts `devvit playtest` and will prompt for Reddit authentication if the CLI is not logged in.

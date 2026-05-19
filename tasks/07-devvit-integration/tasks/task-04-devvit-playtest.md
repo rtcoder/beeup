@@ -19,3 +19,9 @@ Run the game in the Devvit local playtest environment.
 ## Status
 
 Open.
+
+## Notes
+
+- `npm run dev` starts `devvit playtest`.
+- Devvit build, client rebuild, and server rebuild completed successfully.
+- Full playtest is blocked until the Reddit CLI authentication URL is opened and completed by a logged-in user.

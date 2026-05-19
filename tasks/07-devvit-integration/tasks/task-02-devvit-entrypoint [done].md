@@ -1,4 +1,4 @@
-# Task: Configure Devvit Web Entrypoint
+# Task: Configure Devvit Web Entrypoint [done]
 
 ## Goal
 
@@ -17,4 +17,11 @@ Expose Bee Up! as a Devvit Web entrypoint.
 
 ## Status
 
-Open.
+Done in current MVP.
+
+## Notes
+
+- Added `src/client/game.html`.
+- Configured `devvit.json` with `post.dir` as `dist/client`.
+- Configured the default entrypoint to load `game.html`.
+- Confirmed `vite build` emits `dist/client/game.html`.

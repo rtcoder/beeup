@@ -4,20 +4,29 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
+    "dev": "devvit playtest",
+    "dev:local": "vite --host 127.0.0.1",
     "build": "vite build && tsc --noEmit",
+    "deploy": "npm run typecheck && npm run lint && npm run build && devvit upload",
+    "launch": "npm run deploy && devvit publish",
+    "login": "devvit login",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."
   },
   "dependencies": {
+    "@devvit/start": "^0.12.24",
+    "@devvit/web": "^0.12.24",
+    "@hono/node-server": "^2.0.3",
+    "devvit": "^0.12.24",
+    "hono": "^4.12.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
-    "@vitejs/plugin-react": "^5.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^5.0.0",
     "eslint": "^9.0.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "globals": "^16.0.0",

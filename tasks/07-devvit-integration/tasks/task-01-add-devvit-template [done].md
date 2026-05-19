@@ -1,4 +1,4 @@
-# Task: Add Devvit Template Files
+# Task: Add Devvit Template Files [done]
 
 ## Goal
 
@@ -18,4 +18,11 @@ Bring the project in line with the current Devvit React template.
 
 ## Status
 
-Open.
+Done in current MVP.
+
+## Notes
+
+- Added `devvit.json` using the current Devvit Web `post` and `server` sections.
+- Added `@devvit/start`, `@devvit/web`, `devvit`, Hono, and the Hono Node server package.
+- Added Devvit scripts while preserving `dev:local` for quick Vite iteration.
+- Confirmed the Devvit CLI recognizes the project and reports version `0.12.24`.
