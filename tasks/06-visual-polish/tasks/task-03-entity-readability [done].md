@@ -1,4 +1,4 @@
-# Task: Improve Entity Readability
+# Task: Improve Entity Readability [done]
 
 ## Goal
 
@@ -18,4 +18,4 @@ Make honey and spikes readable during fast movement.
 
 ## Status
 
-Partially done. Needs playtest and mobile review.
+Done in current MVP.

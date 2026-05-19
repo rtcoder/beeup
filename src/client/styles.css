@@ -16,6 +16,9 @@ body {
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 251, 230, 0.72), rgba(238, 249, 255, 0.74)),
+    #f7fbff;
 }
 
 button {
@@ -45,7 +48,7 @@ button:active {
   display: grid;
   min-height: 100vh;
   place-items: center;
-  padding: 18px;
+  padding: 16px;
 }
 
 .game-frame {
@@ -56,7 +59,7 @@ button:active {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  padding: 0 4px 10px;
+  padding: 0 4px 12px;
 }
 
 .hud div {
@@ -65,14 +68,16 @@ button:active {
 }
 
 .hud span {
-  color: #627783;
+  color: #506974;
   font-size: 0.78rem;
   font-weight: 800;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
 .hud strong {
-  font-size: 1.45rem;
+  color: #162831;
+  font-size: 1.55rem;
   line-height: 1;
 }
 
@@ -86,9 +91,9 @@ button:active {
   display: block;
   width: 100% !important;
   height: 100% !important;
-  border: 3px solid rgba(35, 50, 58, 0.16);
+  border: 2px solid rgba(35, 50, 58, 0.18);
   border-radius: 8px;
-  box-shadow: 0 18px 45px rgba(38, 59, 70, 0.16);
+  box-shadow: 0 16px 42px rgba(38, 59, 70, 0.17);
   touch-action: none;
 }
 
@@ -101,14 +106,14 @@ button:active {
   gap: 18px;
   padding: 28px;
   text-align: center;
-  background: rgba(247, 251, 255, 0.66);
-  backdrop-filter: blur(4px);
+  background: rgba(247, 251, 255, 0.72);
+  backdrop-filter: blur(5px);
   border-radius: 8px;
 }
 
 .overlay h1 {
   margin: 0;
-  color: #1d2f39;
+  color: #142832;
   font-size: clamp(2.5rem, 12vw, 4.6rem);
   line-height: 0.95;
 }
@@ -116,7 +121,7 @@ button:active {
 .overlay p {
   max-width: 270px;
   margin: 0;
-  color: #415866;
+  color: #344f5e;
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.45;
@@ -124,7 +129,7 @@ button:active {
 
 .overlay small {
   max-width: 270px;
-  color: #596e7a;
+  color: #4f6875;
   font-weight: 700;
   line-height: 1.4;
 }
@@ -140,9 +145,28 @@ button:active {
 }
 
 .result-grid strong {
-  color: #1d2f39;
+  color: #142832;
   font-size: 1.3rem;
   text-align: right;
+}
+
+@media (max-width: 420px) {
+  .game-shell {
+    padding: 12px 10px;
+  }
+
+  .hud {
+    padding-inline: 2px;
+  }
+
+  .overlay {
+    gap: 16px;
+    padding: 22px;
+  }
+
+  .overlay h1 {
+    font-size: 3rem;
+  }
 }
 
 @media (max-height: 760px) {

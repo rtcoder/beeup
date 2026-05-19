@@ -1,4 +1,4 @@
-# Task: Mobile Viewport Test
+# Task: Mobile Viewport Test [done]
 
 ## Goal
 
@@ -20,4 +20,4 @@ Verify mobile layout and controls.
 
 ## Status
 
-Open.
+Done in current MVP.

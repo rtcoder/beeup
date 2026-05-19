@@ -1,4 +1,4 @@
-# Task: Polish Game UI
+# Task: Polish Game UI [done]
 
 ## Goal
 
@@ -19,4 +19,4 @@ Make score, menu, and game over screens feel complete.
 
 ## Status
 
-Partially done in current MVP.
+Done in current MVP.

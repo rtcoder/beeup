@@ -39,8 +39,11 @@ function renderHoney(ctx: CanvasRenderingContext2D, entity: Entity): void {
 
   ctx.save();
   ctx.translate(cx, cy);
-  ctx.fillStyle = '#f9bd32';
-  ctx.strokeStyle = '#d98a19';
+  ctx.shadowColor = 'rgba(122, 89, 20, 0.22)';
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetY = 3;
+  ctx.fillStyle = '#ffc43d';
+  ctx.strokeStyle = '#9b6714';
   ctx.lineWidth = 3;
   ctx.beginPath();
   for (let i = 0; i < 6; i += 1) {
@@ -54,7 +57,16 @@ function renderHoney(ctx: CanvasRenderingContext2D, entity: Entity): void {
   ctx.fill();
   ctx.stroke();
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.48)';
+  ctx.shadowColor = 'transparent';
+  ctx.strokeStyle = 'rgba(255, 244, 178, 0.9)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-8, -2);
+  ctx.lineTo(-1, 5);
+  ctx.lineTo(9, -6);
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.62)';
   ctx.beginPath();
   ctx.ellipse(-5, -6, 5, 3, -0.45, 0, Math.PI * 2);
   ctx.fill();
@@ -63,9 +75,12 @@ function renderHoney(ctx: CanvasRenderingContext2D, entity: Entity): void {
 
 function renderSpike(ctx: CanvasRenderingContext2D, entity: Entity): void {
   ctx.save();
-  ctx.fillStyle = '#2f3b44';
-  ctx.strokeStyle = '#1d252b';
-  ctx.lineWidth = 3;
+  ctx.shadowColor = 'rgba(18, 28, 34, 0.24)';
+  ctx.shadowBlur = 7;
+  ctx.shadowOffsetY = 4;
+  ctx.fillStyle = '#273640';
+  ctx.strokeStyle = '#101820';
+  ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.moveTo(entity.x + entity.width / 2, entity.y);
   ctx.lineTo(entity.x + entity.width, entity.y + entity.height);
@@ -74,13 +89,21 @@ function renderSpike(ctx: CanvasRenderingContext2D, entity: Entity): void {
   ctx.fill();
   ctx.stroke();
 
-  ctx.fillStyle = '#485964';
+  ctx.shadowColor = 'transparent';
+  ctx.fillStyle = '#526570';
   ctx.beginPath();
   ctx.moveTo(entity.x + entity.width / 2, entity.y + 9);
   ctx.lineTo(entity.x + entity.width * 0.66, entity.y + entity.height - 7);
   ctx.lineTo(entity.x + entity.width * 0.37, entity.y + entity.height - 7);
   ctx.closePath();
   ctx.fill();
+
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(entity.x + entity.width / 2, entity.y + 7);
+  ctx.lineTo(entity.x + entity.width * 0.42, entity.y + entity.height - 8);
+  ctx.stroke();
   ctx.restore();
 }
 
