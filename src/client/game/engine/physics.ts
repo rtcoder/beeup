@@ -80,13 +80,10 @@ function updateSpawning(state: GameState, deltaMs: number): void {
   if (state.spawnTimerMs < state.spawnIntervalMs) return;
 
   const spikeCooldownActive = state.elapsedMs - state.lastSpikeRowElapsedMs < SPIKE_ROW_COOLDOWN_MS;
-  if (spikeCooldownActive || hasRecentSpike(state)) {
-    state.spawnTimerMs = state.spawnIntervalMs * 0.5;
-    return;
-  }
+  const allowSpikes = !spikeCooldownActive && !hasRecentSpike(state);
 
   state.spawnTimerMs = 0;
-  spawnRow(state);
+  spawnRow(state, { allowSpikes });
 }
 
 function playerHitbox(state: GameState) {
