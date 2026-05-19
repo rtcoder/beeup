@@ -100,7 +100,7 @@ function updateCollisions(state: GameState): boolean {
   let hitSpike = false;
 
   state.entities = state.entities.filter((entity) => {
-    const inset = entity.type === 'spike' ? 6 : 2;
+    const inset = entity.type === 'spike' ? 3 : 2;
     const entityHitbox = {
       x: entity.x + inset,
       y: entity.y + inset,

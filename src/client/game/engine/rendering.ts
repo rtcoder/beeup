@@ -85,35 +85,71 @@ function renderHoney(ctx: CanvasRenderingContext2D, entity: Entity): void {
 }
 
 function renderSpike(ctx: CanvasRenderingContext2D, entity: Entity): void {
+  const centerX = entity.x + entity.width / 2;
+  const topY = entity.y + 2;
+  const bottomY = entity.y + entity.height - 2;
+
   ctx.save();
   ctx.shadowColor = 'rgba(18, 28, 34, 0.24)';
-  ctx.shadowBlur = 7;
+  ctx.shadowBlur = 8;
   ctx.shadowOffsetY = 4;
-  ctx.fillStyle = '#273640';
-  ctx.strokeStyle = '#101820';
-  ctx.lineWidth = 4;
+
+  ctx.fillStyle = '#26363a';
+  ctx.strokeStyle = '#11191d';
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 5;
   ctx.beginPath();
-  ctx.moveTo(entity.x + entity.width / 2, entity.y);
-  ctx.lineTo(entity.x + entity.width, entity.y + entity.height);
-  ctx.lineTo(entity.x, entity.y + entity.height);
-  ctx.closePath();
+  ctx.moveTo(centerX, topY);
+  ctx.quadraticCurveTo(centerX - 12, entity.y + 18, centerX - 7, bottomY);
+  ctx.lineTo(centerX + 7, bottomY);
+  ctx.quadraticCurveTo(centerX + 12, entity.y + 18, centerX, topY);
   ctx.fill();
   ctx.stroke();
 
-  ctx.shadowColor = 'transparent';
-  ctx.fillStyle = '#526570';
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = '#182429';
   ctx.beginPath();
-  ctx.moveTo(entity.x + entity.width / 2, entity.y + 9);
-  ctx.lineTo(entity.x + entity.width * 0.66, entity.y + entity.height - 7);
-  ctx.lineTo(entity.x + entity.width * 0.37, entity.y + entity.height - 7);
-  ctx.closePath();
-  ctx.fill();
+  ctx.moveTo(centerX - 3, entity.y + 15);
+  ctx.lineTo(entity.x + 4, entity.y + 7);
+  ctx.moveTo(centerX - 8, entity.y + 24);
+  ctx.lineTo(entity.x + 3, entity.y + 27);
+  ctx.moveTo(centerX + 3, entity.y + 17);
+  ctx.lineTo(entity.x + entity.width - 5, entity.y + 10);
+  ctx.moveTo(centerX + 8, entity.y + 28);
+  ctx.lineTo(entity.x + entity.width - 3, entity.y + 32);
+  ctx.stroke();
 
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+  ctx.fillStyle = '#182429';
+  ctx.strokeStyle = '#0d1417';
+  ctx.lineWidth = 2;
+  const thornTips = [
+    { x: entity.x + 4, y: entity.y + 7, angle: -0.8 },
+    { x: entity.x + 3, y: entity.y + 27, angle: -1.85 },
+    { x: entity.x + entity.width - 5, y: entity.y + 10, angle: 0.8 },
+    { x: entity.x + entity.width - 3, y: entity.y + 32, angle: 1.85 },
+  ];
+
+  for (const thorn of thornTips) {
+    ctx.save();
+    ctx.translate(thorn.x, thorn.y);
+    ctx.rotate(thorn.angle);
+    ctx.beginPath();
+    ctx.moveTo(0, -8);
+    ctx.lineTo(5, 5);
+    ctx.lineTo(-5, 5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.shadowColor = 'transparent';
+  ctx.strokeStyle = 'rgba(192, 215, 214, 0.24)';
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(entity.x + entity.width / 2, entity.y + 7);
-  ctx.lineTo(entity.x + entity.width * 0.42, entity.y + entity.height - 8);
+  ctx.moveTo(centerX + 1, entity.y + 9);
+  ctx.quadraticCurveTo(centerX - 4, entity.y + 23, centerX, bottomY - 6);
   ctx.stroke();
   ctx.restore();
 }
@@ -131,8 +167,16 @@ function renderBee(ctx: CanvasRenderingContext2D, state: GameState): void {
   ctx.strokeStyle = 'rgba(120,170,190,0.35)';
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.ellipse(-10, -18 + flap, 11, 7, -0.7, 0, Math.PI * 2);
-  ctx.ellipse(10, -18 - flap, 11, 7, 0.7, 0, Math.PI * 2);
+  ctx.ellipse(-16, -2 + flap, 9, 15, -0.28, 0, Math.PI * 2);
+  ctx.ellipse(16, -2 + flap, 9, 15, 0.28, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#2a2113';
+  ctx.strokeStyle = '#3a2a16';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(0, -15, 10, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
 
@@ -140,27 +184,34 @@ function renderBee(ctx: CanvasRenderingContext2D, state: GameState): void {
   ctx.strokeStyle = '#604a20';
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.ellipse(0, 0, bee.width / 2 - 2, bee.height / 2 - 2, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 4, bee.width / 2 - 8, bee.height / 2 + 2, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
 
   ctx.fillStyle = '#312819';
-  ctx.fillRect(-12, -15, 6, 30);
-  ctx.fillRect(2, -17, 6, 34);
+  ctx.fillRect(-11, -6, 22, 5);
+  ctx.fillRect(-13, 5, 26, 5);
+  ctx.fillRect(-9, 16, 18, 4);
 
-  ctx.fillStyle = '#1d1d1d';
+  ctx.fillStyle = '#f8dd6a';
   ctx.beginPath();
-  ctx.arc(12, -5, 2.5, 0, Math.PI * 2);
+  ctx.ellipse(0, -11, 5, 3, 0, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.strokeStyle = '#3a2a16';
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(17, -15);
-  ctx.quadraticCurveTo(24, -25, 28, -18);
-  ctx.moveTo(8, -16);
-  ctx.quadraticCurveTo(10, -28, 15, -20);
+  ctx.moveTo(-5, -23);
+  ctx.quadraticCurveTo(-13, -31, -18, -23);
+  ctx.moveTo(5, -23);
+  ctx.quadraticCurveTo(13, -31, 18, -23);
   ctx.stroke();
+
+  ctx.fillStyle = '#121212';
+  ctx.beginPath();
+  ctx.arc(-4, -17, 2, 0, Math.PI * 2);
+  ctx.arc(4, -17, 2, 0, Math.PI * 2);
+  ctx.fill();
   ctx.restore();
 }
 
