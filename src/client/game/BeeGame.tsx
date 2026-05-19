@@ -1,0 +1,197 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { GAME_HEIGHT, GAME_WIDTH } from './engine/constants';
+import { createInputState, getCanvasX } from './engine/input';
+import { updateGame, snapshotScore } from './engine/physics';
+import { renderGame, setupCanvas } from './engine/rendering';
+import { createInitialState, resetForPlay } from './engine/state';
+import { loadBestScore, saveBestScore } from './engine/storage';
+import type { GameState, GameStatus, InputState, ScoreSnapshot } from './engine/types';
+
+export function BeeGame() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const stateRef = useRef<GameState>(createInitialState(0));
+  const inputRef = useRef<InputState>(createInputState());
+  const frameRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number>(0);
+  const uiUpdateRef = useRef<number>(0);
+
+  const [status, setStatus] = useState<GameStatus>('menu');
+  const [score, setScore] = useState<ScoreSnapshot>(() => snapshotScore(stateRef.current));
+
+  const syncScore = useCallback(() => {
+    setScore(snapshotScore(stateRef.current));
+  }, []);
+
+  const startGame = useCallback(() => {
+    resetForPlay(stateRef.current, stateRef.current.bestScore);
+    inputRef.current = createInputState();
+    setStatus('playing');
+    syncScore();
+  }, [syncScore]);
+
+  const finishGame = useCallback(() => {
+    const state = stateRef.current;
+    state.status = 'gameOver';
+    if (state.score > state.bestScore) {
+      state.bestScore = state.score;
+      saveBestScore(state.bestScore);
+    }
+    setStatus('gameOver');
+    syncScore();
+  }, [syncScore]);
+
+  useEffect(() => {
+    stateRef.current.bestScore = loadBestScore();
+    syncScore();
+  }, [syncScore]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return undefined;
+
+    const ctx = setupCanvas(canvas);
+    if (!ctx) return undefined;
+
+    const loop = (now: number) => {
+      const lastTime = lastTimeRef.current || now;
+      const deltaMs = Math.min(32, now - lastTime);
+      lastTimeRef.current = now;
+
+      const hitSpike = updateGame(stateRef.current, inputRef.current, deltaMs);
+      renderGame(ctx, stateRef.current);
+
+      if (hitSpike) {
+        finishGame();
+      } else if (stateRef.current.status === 'playing' && now - uiUpdateRef.current > 120) {
+        uiUpdateRef.current = now;
+        syncScore();
+      }
+
+      frameRef.current = requestAnimationFrame(loop);
+    };
+
+    renderGame(ctx, stateRef.current);
+    frameRef.current = requestAnimationFrame(loop);
+
+    return () => {
+      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+    };
+  }, [finishGame, syncScore]);
+
+  useEffect(() => {
+    const isMovementKey = (event: KeyboardEvent) =>
+      event.key === 'ArrowLeft' ||
+      event.key === 'ArrowRight' ||
+      event.key.toLowerCase() === 'a' ||
+      event.key.toLowerCase() === 'd';
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (isMovementKey(event)) event.preventDefault();
+      if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') inputRef.current.left = true;
+      if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') inputRef.current.right = true;
+    };
+
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (isMovementKey(event)) event.preventDefault();
+      if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') inputRef.current.left = false;
+      if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') inputRef.current.right = false;
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return undefined;
+
+    const onPointerDown = (event: PointerEvent) => {
+      canvas.setPointerCapture(event.pointerId);
+      inputRef.current.pointerActive = true;
+      inputRef.current.targetX = getCanvasX(event, canvas);
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (!inputRef.current.pointerActive) return;
+      inputRef.current.targetX = getCanvasX(event, canvas);
+    };
+
+    const onPointerUp = (event: PointerEvent) => {
+      if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+      inputRef.current.pointerActive = false;
+      inputRef.current.targetX = null;
+    };
+
+    canvas.addEventListener('pointerdown', onPointerDown);
+    canvas.addEventListener('pointermove', onPointerMove);
+    canvas.addEventListener('pointerup', onPointerUp);
+    canvas.addEventListener('pointercancel', onPointerUp);
+
+    return () => {
+      canvas.removeEventListener('pointerdown', onPointerDown);
+      canvas.removeEventListener('pointermove', onPointerMove);
+      canvas.removeEventListener('pointerup', onPointerUp);
+      canvas.removeEventListener('pointercancel', onPointerUp);
+    };
+  }, []);
+
+  return (
+    <main className="game-shell">
+      <section className="game-frame" aria-label="Bee Up game">
+        <div className="hud" aria-live="polite">
+          <div>
+            <span>Score</span>
+            <strong>{score.score}</strong>
+          </div>
+          <div>
+            <span>Best</span>
+            <strong>{score.bestScore}</strong>
+          </div>
+        </div>
+
+        <div className="canvas-wrap">
+          <canvas
+            ref={canvasRef}
+            className="game-canvas"
+            width={GAME_WIDTH}
+            height={GAME_HEIGHT}
+            aria-label="Bee Up play field"
+          />
+
+          {status === 'menu' && (
+            <div className="overlay">
+              <h1>Bee Up!</h1>
+              <p>Collect honey. Dodge thorns. Fly as high as you can.</p>
+              <button type="button" onClick={startGame}>
+                Start
+              </button>
+              <small>Use A/D, arrow keys, or drag on the canvas.</small>
+            </div>
+          )}
+
+          {status === 'gameOver' && (
+            <div className="overlay">
+              <h1>Game Over</h1>
+              <div className="result-grid">
+                <span>Final score</span>
+                <strong>{score.score}</strong>
+                <span>Honey</span>
+                <strong>{score.honeyScore}</strong>
+                <span>Best</span>
+                <strong>{score.bestScore}</strong>
+              </div>
+              <button type="button" onClick={startGame}>
+                Play again
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
+  );
+}
