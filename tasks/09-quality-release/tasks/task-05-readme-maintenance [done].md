@@ -1,4 +1,4 @@
-# Task: Maintain README
+# Task: Maintain README [done]
 
 ## Goal
 
@@ -18,4 +18,4 @@ Keep project documentation current.
 
 ## Status
 
-Partially done.
+Done in current MVP.

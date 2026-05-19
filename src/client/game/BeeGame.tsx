@@ -22,6 +22,12 @@ export function BeeGame() {
     setScore(snapshotScore(stateRef.current));
   }, []);
 
+  const triggerHaptic = useCallback((pattern: number | number[]) => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(pattern);
+    }
+  }, []);
+
   const startGame = useCallback(() => {
     resetForPlay(stateRef.current, stateRef.current.bestScore);
     inputRef.current = createInputState();
@@ -36,9 +42,10 @@ export function BeeGame() {
       state.bestScore = state.score;
       saveBestScore(state.bestScore);
     }
+    triggerHaptic([45, 35, 70]);
     setStatus('gameOver');
     syncScore();
-  }, [syncScore]);
+  }, [syncScore, triggerHaptic]);
 
   useEffect(() => {
     stateRef.current.bestScore = loadBestScore();
@@ -57,7 +64,11 @@ export function BeeGame() {
       const deltaMs = Math.min(32, now - lastTime);
       lastTimeRef.current = now;
 
+      const previousHoneyScore = stateRef.current.honeyScore;
       const hitSpike = updateGame(stateRef.current, inputRef.current, deltaMs);
+      if (stateRef.current.honeyScore > previousHoneyScore) {
+        triggerHaptic(18);
+      }
       renderGame(ctx, stateRef.current);
 
       if (hitSpike) {
@@ -76,7 +87,7 @@ export function BeeGame() {
     return () => {
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
     };
-  }, [finishGame, syncScore]);
+  }, [finishGame, syncScore, triggerHaptic]);
 
   useEffect(() => {
     const isMovementKey = (event: KeyboardEvent) =>
