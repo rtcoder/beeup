@@ -35,6 +35,7 @@ export interface GameState {
   difficulty: number;
   nextEntityId: number;
   cloudOffset: number;
+  lastSpikeRowElapsedMs: number;
 }
 
 export interface InputState {

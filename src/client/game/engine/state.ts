@@ -30,6 +30,7 @@ export function createInitialState(bestScore: number): GameState {
     difficulty: 0,
     nextEntityId: 1,
     cloudOffset: 0,
+    lastSpikeRowElapsedMs: -Infinity,
   };
 }
 

@@ -1,4 +1,4 @@
-# Task: Expand Row Patterns
+# Task: Expand Row Patterns [done]
 
 ## Goal
 
@@ -19,4 +19,4 @@ Add more row patterns as difficulty rises.
 
 ## Status
 
-Partially done. Current MVP has simple honey, spike, two-spike, and mixed rows.
+Done in current MVP.

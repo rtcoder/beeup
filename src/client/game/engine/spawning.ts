@@ -10,7 +10,7 @@ import {
 } from './constants';
 import type { Entity, GameState } from './types';
 
-type RowPattern = 'singleHoney' | 'doubleHoney' | 'singleSpike' | 'twoSpikes' | 'mixed';
+type RowPattern = 'singleHoney' | 'doubleHoney' | 'singleSpike' | 'twoSpikes' | 'spikeHoneySpike' | 'mixed';
 
 function randomLane(except: Set<number> = new Set()): number {
   const available = Array.from({ length: LANES }, (_, lane) => lane).filter((lane) => !except.has(lane));
@@ -56,12 +56,18 @@ function choosePattern(state: GameState): RowPattern {
   }
 
   const roll = Math.random();
-  if (state.difficulty > 0.55 && roll > 0.86) return 'twoSpikes';
-  if (state.difficulty > 0.7 && roll > 0.74) return 'mixed';
-  if (roll < 0.34) return 'singleHoney';
-  if (roll < 0.52) return 'doubleHoney';
-  if (roll < 0.76) return 'singleSpike';
+  if (state.difficulty > 0.72 && roll > 0.9) return 'spikeHoneySpike';
+  if (state.difficulty > 0.52 && roll > 0.78) return 'twoSpikes';
+  if (state.difficulty > 0.35 && roll > 0.62) return 'mixed';
+  if (roll < 0.3) return 'singleHoney';
+  if (roll < 0.5) return 'doubleHoney';
+  if (roll < 0.72) return 'singleSpike';
   return 'mixed';
+}
+
+function addSpike(state: GameState, entities: Entity[], lane: number): void {
+  entities.push(createSpike(state, lane));
+  state.lastSpikeRowElapsedMs = state.elapsedMs;
 }
 
 export function spawnRow(state: GameState): void {
@@ -79,19 +85,32 @@ export function spawnRow(state: GameState): void {
   }
 
   if (pattern === 'singleSpike') {
-    entities.push(createSpike(state, randomLane()));
+    addSpike(state, entities, randomLane());
   }
 
   if (pattern === 'twoSpikes') {
-    const first = randomLane();
-    const second = randomLane(new Set([first]));
-    entities.push(createSpike(state, first), createSpike(state, second));
+    const safeLane = randomLane();
+    const first = randomLane(new Set([safeLane]));
+    const second = randomLane(new Set([safeLane, first]));
+    addSpike(state, entities, first);
+    addSpike(state, entities, second);
+  }
+
+  if (pattern === 'spikeHoneySpike') {
+    const honeyLane = 1 + Math.floor(Math.random() * (LANES - 2));
+    const leftSpikeLane = honeyLane - 1;
+    const rightSpikeLane = honeyLane + 1;
+    addSpike(state, entities, leftSpikeLane);
+    entities.push(createHoney(state, honeyLane));
+    addSpike(state, entities, rightSpikeLane);
   }
 
   if (pattern === 'mixed') {
-    const spikeLane = randomLane();
+    const safeLane = randomLane();
+    const spikeLane = randomLane(new Set([safeLane]));
     const honeyLane = randomLane(new Set([spikeLane]));
-    entities.push(createSpike(state, spikeLane), createHoney(state, honeyLane));
+    addSpike(state, entities, spikeLane);
+    entities.push(createHoney(state, honeyLane));
   }
 
   state.entities.push(...entities);

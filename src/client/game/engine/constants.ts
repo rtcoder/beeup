@@ -22,6 +22,8 @@ export const MIN_SPAWN_INTERVAL_MS = 320;
 export const DIFFICULTY_RAMP_MS = 45_000;
 export const SAFE_START_MS = 2_500;
 export const MIN_VERTICAL_GAP = 120;
+export const MAX_VERTICAL_GAP = 230;
+export const SPIKE_ROW_COOLDOWN_MS = 520;
 
 export const BEST_SCORE_KEY = 'bee-up-best-score';
 export const SCORE_PER_SECOND = 12;

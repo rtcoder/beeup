@@ -1,4 +1,4 @@
-# Task: Guarantee Safe Lanes
+# Task: Guarantee Safe Lanes [done]
 
 ## Goal
 
@@ -17,4 +17,4 @@ Prevent impossible rows.
 
 ## Status
 
-Partially done. Current rows never fill all lanes, but advanced pattern checks still need playtesting.
+Done in current MVP.

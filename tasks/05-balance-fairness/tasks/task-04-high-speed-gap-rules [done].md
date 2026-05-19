@@ -1,4 +1,4 @@
-# Task: Tune High-Speed Gap Rules
+# Task: Tune High-Speed Gap Rules [done]
 
 ## Goal
 
@@ -17,4 +17,4 @@ Avoid unreadable consecutive obstacles at high speed.
 
 ## Status
 
-Partially done. Current MVP has a simple recent-spike check.
+Done in current MVP.

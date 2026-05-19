@@ -5,10 +5,12 @@ import {
   INITIAL_SPAWN_INTERVAL_MS,
   INITIAL_WORLD_SPEED,
   MAX_WORLD_SPEED,
+  MAX_VERTICAL_GAP,
   MIN_SPAWN_INTERVAL_MS,
   MIN_VERTICAL_GAP,
   PLAYER_SPEED,
   SCORE_PER_SECOND,
+  SPIKE_ROW_COOLDOWN_MS,
   TOUCH_FOLLOW_RATE,
   TOUCH_SNAP_DISTANCE,
 } from './constants';
@@ -56,8 +58,13 @@ function updatePlayer(state: GameState, input: InputState, deltaSeconds: number)
   state.player.x = clamp(state.player.x, 0, GAME_WIDTH - state.player.width);
 }
 
+function spikeRowGap(state: GameState): number {
+  return MIN_VERTICAL_GAP + (MAX_VERTICAL_GAP - MIN_VERTICAL_GAP) * state.difficulty;
+}
+
 function hasRecentSpike(state: GameState): boolean {
-  return state.entities.some((entity) => entity.type === 'spike' && entity.y < MIN_VERTICAL_GAP);
+  const requiredGap = spikeRowGap(state);
+  return state.entities.some((entity) => entity.type === 'spike' && entity.y < requiredGap);
 }
 
 function updateEntities(state: GameState, deltaSeconds: number): void {
@@ -72,7 +79,8 @@ function updateSpawning(state: GameState, deltaMs: number): void {
   state.spawnTimerMs += deltaMs;
   if (state.spawnTimerMs < state.spawnIntervalMs) return;
 
-  if (state.worldSpeed > 390 && hasRecentSpike(state)) {
+  const spikeCooldownActive = state.elapsedMs - state.lastSpikeRowElapsedMs < SPIKE_ROW_COOLDOWN_MS;
+  if (spikeCooldownActive || hasRecentSpike(state)) {
     state.spawnTimerMs = state.spawnIntervalMs * 0.5;
     return;
   }
