@@ -2,6 +2,8 @@ export type GameStatus = 'menu' | 'playing' | 'gameOver';
 
 export type EntityType = 'honey' | 'spike';
 
+export type HoneyVariant = 'small' | 'large' | 'golden';
+
 export interface Rect {
   x: number;
   y: number;
@@ -16,6 +18,7 @@ export interface Player extends Rect {
 export interface Entity extends Rect {
   id: string;
   type: EntityType;
+  honeyVariant?: HoneyVariant;
   speedY?: number;
   points?: number;
 }

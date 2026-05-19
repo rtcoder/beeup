@@ -10,10 +10,14 @@ export const TOUCH_SNAP_DISTANCE = 0.75;
 export const LANES = 5;
 export const LANE_WIDTH = GAME_WIDTH / LANES;
 
-export const HONEY_SIZE = 30;
+export const SMALL_HONEY_SIZE = 24;
+export const LARGE_HONEY_SIZE = 34;
+export const GOLDEN_HONEY_SIZE = 30;
 export const SPIKE_WIDTH = 44;
 export const SPIKE_HEIGHT = 42;
-export const HONEY_POINTS = 25;
+export const SMALL_HONEY_POINTS = 15;
+export const LARGE_HONEY_POINTS = 35;
+export const GOLDEN_HONEY_POINTS = 75;
 
 export const INITIAL_WORLD_SPEED = 165;
 export const MAX_WORLD_SPEED = 500;

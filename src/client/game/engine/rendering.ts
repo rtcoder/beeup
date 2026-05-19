@@ -36,15 +36,20 @@ function renderHoney(ctx: CanvasRenderingContext2D, entity: Entity): void {
   const cx = entity.x + entity.width / 2;
   const cy = entity.y + entity.height / 2;
   const radius = entity.width / 2;
+  const variant = entity.honeyVariant ?? 'large';
+  const isGolden = variant === 'golden';
+  const fill = isGolden ? '#ffe45c' : variant === 'small' ? '#ffca45' : '#f4a928';
+  const stroke = isGolden ? '#99670a' : variant === 'small' ? '#a86b12' : '#87550e';
+  const shine = isGolden ? 'rgba(255, 255, 255, 0.82)' : 'rgba(255, 255, 255, 0.62)';
 
   ctx.save();
   ctx.translate(cx, cy);
-  ctx.shadowColor = 'rgba(122, 89, 20, 0.22)';
-  ctx.shadowBlur = 8;
+  ctx.shadowColor = isGolden ? 'rgba(255, 206, 40, 0.58)' : 'rgba(122, 89, 20, 0.22)';
+  ctx.shadowBlur = isGolden ? 14 : 8;
   ctx.shadowOffsetY = 3;
-  ctx.fillStyle = '#ffc43d';
-  ctx.strokeStyle = '#9b6714';
-  ctx.lineWidth = 3;
+  ctx.fillStyle = fill;
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = isGolden ? 3.5 : 3;
   ctx.beginPath();
   for (let i = 0; i < 6; i += 1) {
     const angle = Math.PI / 6 + (Math.PI * 2 * i) / 6;
@@ -58,17 +63,23 @@ function renderHoney(ctx: CanvasRenderingContext2D, entity: Entity): void {
   ctx.stroke();
 
   ctx.shadowColor = 'transparent';
-  ctx.strokeStyle = 'rgba(255, 244, 178, 0.9)';
+  if (isGolden) {
+    ctx.strokeStyle = 'rgba(255, 246, 148, 0.75)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-radius * 0.5, -radius * 0.5, radius, radius);
+  }
+
+  ctx.strokeStyle = isGolden ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 244, 178, 0.9)';
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(-8, -2);
-  ctx.lineTo(-1, 5);
-  ctx.lineTo(9, -6);
+  ctx.moveTo(-radius * 0.5, -radius * 0.12);
+  ctx.lineTo(-radius * 0.08, radius * 0.34);
+  ctx.lineTo(radius * 0.6, -radius * 0.42);
   ctx.stroke();
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.62)';
+  ctx.fillStyle = shine;
   ctx.beginPath();
-  ctx.ellipse(-5, -6, 5, 3, -0.45, 0, Math.PI * 2);
+  ctx.ellipse(-radius * 0.34, -radius * 0.4, radius * 0.34, radius * 0.2, -0.45, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }

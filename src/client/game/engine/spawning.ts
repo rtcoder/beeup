@@ -1,14 +1,18 @@
 import {
   GAME_WIDTH,
-  HONEY_POINTS,
-  HONEY_SIZE,
+  GOLDEN_HONEY_POINTS,
+  GOLDEN_HONEY_SIZE,
+  LARGE_HONEY_POINTS,
+  LARGE_HONEY_SIZE,
   LANES,
   LANE_WIDTH,
   SAFE_START_MS,
+  SMALL_HONEY_POINTS,
+  SMALL_HONEY_SIZE,
   SPIKE_HEIGHT,
   SPIKE_WIDTH,
 } from './constants';
-import type { Entity, GameState } from './types';
+import type { Entity, GameState, HoneyVariant } from './types';
 
 type RowPattern = 'singleHoney' | 'doubleHoney' | 'singleSpike' | 'twoSpikes' | 'spikeHoneySpike' | 'mixed';
 
@@ -31,15 +35,34 @@ function entityId(state: GameState, type: string): string {
   return id;
 }
 
-function createHoney(state: GameState, lane: number): Entity {
+function honeyStats(variant: HoneyVariant): { points: number; size: number } {
+  if (variant === 'small') return { points: SMALL_HONEY_POINTS, size: SMALL_HONEY_SIZE };
+  if (variant === 'golden') return { points: GOLDEN_HONEY_POINTS, size: GOLDEN_HONEY_SIZE };
+  return { points: LARGE_HONEY_POINTS, size: LARGE_HONEY_SIZE };
+}
+
+function chooseHoneyVariant(state: GameState): HoneyVariant {
+  const roll = Math.random();
+  const goldenChance = 0.04 + state.difficulty * 0.04;
+  const largeChance = 0.34 + state.difficulty * 0.08;
+
+  if (roll < goldenChance) return 'golden';
+  if (roll < goldenChance + largeChance) return 'large';
+  return 'small';
+}
+
+function createHoney(state: GameState, lane: number, variant: HoneyVariant = chooseHoneyVariant(state)): Entity {
+  const { points, size } = honeyStats(variant);
+
   return {
     id: entityId(state, 'honey'),
     type: 'honey',
-    x: laneCenter(lane) - HONEY_SIZE / 2,
-    y: -HONEY_SIZE - 8,
-    width: HONEY_SIZE,
-    height: HONEY_SIZE,
-    points: HONEY_POINTS,
+    honeyVariant: variant,
+    x: laneCenter(lane) - size / 2,
+    y: -size - 8,
+    width: size,
+    height: size,
+    points,
   };
 }
 
@@ -135,7 +158,7 @@ export function spawnRow(state: GameState, options: SpawnOptions = { allowSpikes
     const leftSpikeLane = honeyLane - 1;
     const rightSpikeLane = honeyLane + 1;
     addSpike(state, entities, leftSpikeLane);
-    entities.push(createHoney(state, honeyLane));
+    entities.push(createHoney(state, honeyLane, Math.random() < 0.26 ? 'golden' : 'large'));
     addSpike(state, entities, rightSpikeLane);
   }
 
