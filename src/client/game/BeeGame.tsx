@@ -56,8 +56,17 @@ export function BeeGame() {
     const canvas = canvasRef.current;
     if (!canvas) return undefined;
 
-    const ctx = setupCanvas(canvas);
-    if (!ctx) return undefined;
+    const initialCtx = setupCanvas(canvas);
+    if (!initialCtx) return undefined;
+    let ctx = initialCtx;
+
+    const resizeObserver = new ResizeObserver(() => {
+      const nextCtx = setupCanvas(canvas);
+      if (!nextCtx) return;
+      ctx = nextCtx;
+      renderGame(ctx, stateRef.current);
+    });
+    resizeObserver.observe(canvas);
 
     const loop = (now: number) => {
       const lastTime = lastTimeRef.current || now;
@@ -85,6 +94,7 @@ export function BeeGame() {
     frameRef.current = requestAnimationFrame(loop);
 
     return () => {
+      resizeObserver.disconnect();
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
     };
   }, [finishGame, syncScore, triggerHaptic]);

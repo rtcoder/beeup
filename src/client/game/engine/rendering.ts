@@ -217,15 +217,18 @@ function renderBee(ctx: CanvasRenderingContext2D, state: GameState): void {
 
 export function setupCanvas(canvas: HTMLCanvasElement): CanvasRenderingContext2D | null {
   const dpr = window.devicePixelRatio || 1;
-  canvas.width = GAME_WIDTH * dpr;
-  canvas.height = GAME_HEIGHT * dpr;
-  canvas.style.width = `${GAME_WIDTH}px`;
-  canvas.style.height = `${GAME_HEIGHT}px`;
+  const cssWidth = canvas.clientWidth || GAME_WIDTH;
+  const cssHeight = canvas.clientHeight || GAME_HEIGHT;
+  const nextWidth = Math.round(cssWidth * dpr);
+  const nextHeight = Math.round(cssHeight * dpr);
+
+  if (canvas.width !== nextWidth) canvas.width = nextWidth;
+  if (canvas.height !== nextHeight) canvas.height = nextHeight;
 
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
 
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.setTransform((cssWidth / GAME_WIDTH) * dpr, 0, 0, (cssHeight / GAME_HEIGHT) * dpr, 0, 0);
   return ctx;
 }
 
