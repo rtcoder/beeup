@@ -1,4 +1,4 @@
-# Task: Add Redis Leaderboard
+# Task: Add Redis Leaderboard [done]
 
 ## Goal
 
@@ -18,4 +18,11 @@ Persist top scores in Devvit Redis.
 
 ## Status
 
-Open.
+Done in current MVP.
+
+## Notes
+
+- Scores are stored in a Redis sorted set.
+- Leaderboard keys are per post when `context.postId` exists, with a global fallback for non-post contexts.
+- Top scores are returned in descending score order.
+- Entries include username when available.

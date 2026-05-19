@@ -15,8 +15,9 @@ Tiny Reddit Devvit Web game prototype built with React, TypeScript, Vite, and Ca
 - AABB collisions
 - time and honey score
 - local best score
+- Redis-backed leaderboard in Devvit
 - lightweight haptic feedback for honey and game over where supported
-- score API validation stub
+- score API validation and basic anti-cheat limits
 - task backlog in `tasks/`
 
 ## Gameplay
@@ -74,5 +75,18 @@ The project includes a Devvit Web configuration:
 - `src/server/index.ts` starts a Hono server through Devvit Web.
 - `src/server/core/post.ts` creates a Bee Up! custom post through `reddit.submitCustomPost`.
 - The subreddit menu item `Create Bee Up! post` calls `/internal/menu/post-create`.
+- `POST /api/score` validates and stores final scores.
+- `GET /api/leaderboard` returns the top scores for the current post.
 
 `npm run dev` starts `devvit playtest` and will prompt for Reddit authentication if the CLI is not logged in.
+
+## Leaderboard
+
+Scores are stored in Devvit Redis sorted sets. The leaderboard is scoped by `context.postId` when available, with a global fallback for non-post contexts.
+
+Score submissions are intentionally conservative:
+
+- all score fields must be finite non-negative integers
+- final score must match `honeyScore + distanceScore` within a small rounding tolerance
+- elapsed time is capped at ten minutes
+- max possible score is capped by elapsed time plus a generous honey pickup allowance

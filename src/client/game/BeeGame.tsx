@@ -5,6 +5,7 @@ import { updateGame, snapshotScore } from './engine/physics';
 import { renderGame, setupCanvas } from './engine/rendering';
 import { createInitialState, resetForPlay } from './engine/state';
 import { loadBestScore, saveBestScore } from './engine/storage';
+import type { LeaderboardEntry, LeaderboardResponse, ScorePayload, ScoreResponse } from '../../shared/game';
 import type { GameState, GameStatus, InputState, ScoreSnapshot } from './engine/types';
 
 export function BeeGame() {
@@ -14,9 +15,12 @@ export function BeeGame() {
   const frameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const uiUpdateRef = useRef<number>(0);
+  const submittedRunRef = useRef<number | null>(null);
 
   const [status, setStatus] = useState<GameStatus>('menu');
   const [score, setScore] = useState<ScoreSnapshot>(() => snapshotScore(stateRef.current));
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardStatus, setLeaderboardStatus] = useState<'idle' | 'saving' | 'error'>('idle');
 
   const syncScore = useCallback(() => {
     setScore(snapshotScore(stateRef.current));
@@ -31,9 +35,55 @@ export function BeeGame() {
   const startGame = useCallback(() => {
     resetForPlay(stateRef.current, stateRef.current.bestScore);
     inputRef.current = createInputState();
+    submittedRunRef.current = null;
+    setLeaderboardStatus('idle');
     setStatus('playing');
     syncScore();
   }, [syncScore]);
+
+  const loadLeaderboard = useCallback(async () => {
+    try {
+      const response = await fetch('/api/leaderboard');
+      if (!response.ok) return;
+      const data = (await response.json()) as LeaderboardResponse;
+      if (data.ok) setLeaderboard(data.leaderboard);
+    } catch {
+      // Local Vite development has no Devvit server; keep the local-only experience quiet.
+    }
+  }, []);
+
+  const submitScore = useCallback(async (snapshot: ScoreSnapshot) => {
+    if (submittedRunRef.current === snapshot.elapsedMs) return;
+    submittedRunRef.current = snapshot.elapsedMs;
+    setLeaderboardStatus('saving');
+
+    const payload: ScorePayload = {
+      score: snapshot.score,
+      honeyScore: snapshot.honeyScore,
+      distanceScore: snapshot.distanceScore,
+      elapsedMs: snapshot.elapsedMs,
+    };
+
+    try {
+      const response = await fetch('/api/score', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error('Score submission failed');
+
+      const data = (await response.json()) as ScoreResponse;
+      if (data.ok) {
+        setLeaderboard(data.leaderboard);
+        setLeaderboardStatus('idle');
+      }
+    } catch {
+      setLeaderboardStatus('error');
+    }
+  }, []);
 
   const finishGame = useCallback(() => {
     const state = stateRef.current;
@@ -42,15 +92,18 @@ export function BeeGame() {
       state.bestScore = state.score;
       saveBestScore(state.bestScore);
     }
+    const finalScore = snapshotScore(state);
     triggerHaptic([45, 35, 70]);
     setStatus('gameOver');
-    syncScore();
-  }, [syncScore, triggerHaptic]);
+    setScore(finalScore);
+    void submitScore(finalScore);
+  }, [submitScore, triggerHaptic]);
 
   useEffect(() => {
     stateRef.current.bestScore = loadBestScore();
     syncScore();
-  }, [syncScore]);
+    void loadLeaderboard();
+  }, [loadLeaderboard, syncScore]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -209,6 +262,24 @@ export function BeeGame() {
               <button type="button" onClick={startGame}>
                 Play again
               </button>
+              <div className="leaderboard" aria-label="Leaderboard">
+                <h2>Leaderboard</h2>
+                {leaderboard.length > 0 ? (
+                  <ol>
+                    {leaderboard.slice(0, 5).map((entry) => (
+                      <li key={`${entry.createdAt}-${entry.rank}`}>
+                        <span>
+                          {entry.rank}. {entry.username}
+                        </span>
+                        <strong>{entry.score}</strong>
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p>{leaderboardStatus === 'saving' ? 'Saving score...' : 'No scores yet'}</p>
+                )}
+                {leaderboardStatus === 'error' && <small>Leaderboard unavailable in local mode.</small>}
+              </div>
             </div>
           )}
         </div>

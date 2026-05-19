@@ -1,4 +1,4 @@
-# Task: Submit Score On Game Over
+# Task: Submit Score On Game Over [done]
 
 ## Goal
 
@@ -18,4 +18,11 @@ Send score data to the API after a run ends.
 
 ## Status
 
-Open.
+Done in current MVP.
+
+## Notes
+
+- Game over builds a final score payload from the frozen game snapshot.
+- The score is submitted once per completed run.
+- Network failure does not block restart.
+- Local Vite mode quietly shows a non-blocking leaderboard unavailable message.

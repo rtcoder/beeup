@@ -150,6 +150,44 @@ button:active {
   text-align: right;
 }
 
+.leaderboard {
+  display: grid;
+  gap: 8px;
+  width: min(100%, 280px);
+}
+
+.leaderboard h2 {
+  margin: 0;
+  color: #142832;
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.leaderboard ol {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.leaderboard li {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  color: #344f5e;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.leaderboard p,
+.leaderboard small {
+  margin: 0;
+  color: #4f6875;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 @media (max-width: 420px) {
   .game-shell {
     padding: 12px 10px;

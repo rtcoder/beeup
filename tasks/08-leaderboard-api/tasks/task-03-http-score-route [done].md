@@ -1,4 +1,4 @@
-# Task: Add POST /api/score Route
+# Task: Add POST /api/score Route [done]
 
 ## Goal
 
@@ -18,4 +18,11 @@ Expose score validation through an HTTP endpoint.
 
 ## Status
 
-Open.
+Done in current MVP.
+
+## Notes
+
+- Added `POST /api/score` to the Devvit/Hono server.
+- Valid payloads are written to Redis and return the latest leaderboard.
+- Invalid payloads return `400`.
+- Added `GET /api/leaderboard` for loading the current top scores.
