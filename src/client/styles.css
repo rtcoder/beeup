@@ -81,6 +81,25 @@ button:active {
   line-height: 1;
 }
 
+.power-hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 4px 8px;
+}
+
+.power-hud span {
+  border: 1px solid rgba(35, 50, 58, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #243741;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1;
+  padding: 7px 9px;
+}
+
 .canvas-wrap {
   position: relative;
   width: 100%;

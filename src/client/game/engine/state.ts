@@ -23,6 +23,7 @@ export function createInitialState(bestScore: number): GameState {
     bestScore,
     distanceScore: 0,
     honeyScore: 0,
+    bonusScore: 0,
     elapsedMs: 0,
     worldSpeed: INITIAL_WORLD_SPEED,
     spawnTimerMs: 0,
@@ -31,6 +32,10 @@ export function createInitialState(bestScore: number): GameState {
     nextEntityId: 1,
     cloudOffset: 0,
     lastSpikeRowElapsedMs: -Infinity,
+    shieldCharges: 0,
+    magnetTimeMs: 0,
+    comboCount: 0,
+    comboTimerMs: 0,
   };
 }
 

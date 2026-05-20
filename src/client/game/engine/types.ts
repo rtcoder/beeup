@@ -1,8 +1,9 @@
 export type GameStatus = 'menu' | 'playing' | 'gameOver';
 
-export type EntityType = 'honey' | 'spike';
+export type EntityType = 'honey' | 'spike' | 'powerUp';
 
 export type HoneyVariant = 'small' | 'large' | 'golden';
+export type PowerUpType = 'shield' | 'magnet';
 
 export interface Rect {
   x: number;
@@ -19,8 +20,10 @@ export interface Entity extends Rect {
   id: string;
   type: EntityType;
   honeyVariant?: HoneyVariant;
+  powerUpType?: PowerUpType;
   speedY?: number;
   points?: number;
+  nearMissAwarded?: boolean;
 }
 
 export interface GameState {
@@ -31,6 +34,7 @@ export interface GameState {
   bestScore: number;
   distanceScore: number;
   honeyScore: number;
+  bonusScore: number;
   elapsedMs: number;
   worldSpeed: number;
   spawnTimerMs: number;
@@ -39,6 +43,10 @@ export interface GameState {
   nextEntityId: number;
   cloudOffset: number;
   lastSpikeRowElapsedMs: number;
+  shieldCharges: number;
+  magnetTimeMs: number;
+  comboCount: number;
+  comboTimerMs: number;
 }
 
 export interface InputState {
@@ -53,5 +61,9 @@ export interface ScoreSnapshot {
   bestScore: number;
   honeyScore: number;
   distanceScore: number;
+  bonusScore: number;
   elapsedMs: number;
+  shieldCharges: number;
+  magnetTimeMs: number;
+  comboCount: number;
 }

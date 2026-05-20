@@ -2,6 +2,7 @@ export interface ScorePayload {
   score: number;
   honeyScore: number;
   distanceScore: number;
+  bonusScore: number;
   elapsedMs: number;
 }
 
@@ -11,6 +12,7 @@ export interface LeaderboardEntry {
   username: string;
   honeyScore: number;
   distanceScore: number;
+  bonusScore: number;
   elapsedMs: number;
   createdAt: number;
 }

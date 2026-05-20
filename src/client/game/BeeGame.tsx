@@ -61,6 +61,7 @@ export function BeeGame() {
       score: snapshot.score,
       honeyScore: snapshot.honeyScore,
       distanceScore: snapshot.distanceScore,
+      bonusScore: snapshot.bonusScore,
       elapsedMs: snapshot.elapsedMs,
     };
 
@@ -227,6 +228,13 @@ export function BeeGame() {
             <strong>{score.bestScore}</strong>
           </div>
         </div>
+        {status === 'playing' && (score.shieldCharges > 0 || score.magnetTimeMs > 0 || score.comboCount > 1) && (
+          <div className="power-hud" aria-live="polite">
+            {score.shieldCharges > 0 && <span>Shield</span>}
+            {score.magnetTimeMs > 0 && <span>Magnet {Math.ceil(score.magnetTimeMs / 1000)}s</span>}
+            {score.comboCount > 1 && <span>Combo x{score.comboCount}</span>}
+          </div>
+        )}
 
         <div className="canvas-wrap">
           <canvas
@@ -256,6 +264,8 @@ export function BeeGame() {
                 <strong>{score.score}</strong>
                 <span>Honey</span>
                 <strong>{score.honeyScore}</strong>
+                <span>Bonus</span>
+                <strong>{score.bonusScore}</strong>
                 <span>Best</span>
                 <strong>{score.bestScore}</strong>
               </div>

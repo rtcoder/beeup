@@ -154,14 +154,82 @@ function renderSpike(ctx: CanvasRenderingContext2D, entity: Entity): void {
   ctx.restore();
 }
 
+function renderPowerUp(ctx: CanvasRenderingContext2D, entity: Entity): void {
+  const cx = entity.x + entity.width / 2;
+  const cy = entity.y + entity.height / 2;
+  const isShield = entity.powerUpType === 'shield';
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.shadowColor = isShield ? 'rgba(48, 137, 219, 0.38)' : 'rgba(220, 78, 116, 0.34)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 3;
+  ctx.fillStyle = isShield ? '#bfefff' : '#ffd1de';
+  ctx.strokeStyle = isShield ? '#2479b8' : '#b73862';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(0, 0, entity.width / 2 - 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.shadowColor = 'transparent';
+  if (isShield) {
+    ctx.fillStyle = '#2b8fd8';
+    ctx.strokeStyle = '#14517e';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, -11);
+    ctx.lineTo(10, -6);
+    ctx.quadraticCurveTo(8, 9, 0, 14);
+    ctx.quadraticCurveTo(-8, 9, -10, -6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  } else {
+    ctx.strokeStyle = '#b73862';
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(0, -1, 10, Math.PI * 0.12, Math.PI * 0.88, true);
+    ctx.stroke();
+    ctx.fillStyle = '#f8f4ff';
+    ctx.fillRect(-14, 4, 8, 8);
+    ctx.fillRect(6, 4, 8, 8);
+    ctx.strokeStyle = '#7e2041';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-14, 4, 8, 8);
+    ctx.strokeRect(6, 4, 8, 8);
+  }
+  ctx.restore();
+}
+
 function renderBee(ctx: CanvasRenderingContext2D, state: GameState): void {
   const bee = state.player;
   const cx = bee.x + bee.width / 2;
   const cy = bee.y + bee.height / 2;
   const flap = Math.sin(state.elapsedMs / 60) * 3;
+  const pulse = Math.sin(state.elapsedMs / 95) * 2;
 
   ctx.save();
   ctx.translate(cx, cy);
+
+  if (state.magnetTimeMs > 0) {
+    ctx.strokeStyle = 'rgba(190, 52, 92, 0.28)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, 0, 54 + pulse, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  if (state.shieldCharges > 0) {
+    ctx.fillStyle = 'rgba(119, 214, 255, 0.16)';
+    ctx.strokeStyle = 'rgba(31, 128, 192, 0.55)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, 1, 30 + pulse, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
 
   ctx.fillStyle = 'rgba(255,255,255,0.72)';
   ctx.strokeStyle = 'rgba(120,170,190,0.35)';
@@ -239,6 +307,7 @@ export function renderGame(ctx: CanvasRenderingContext2D, state: GameState): voi
   for (const entity of state.entities) {
     if (entity.type === 'honey') renderHoney(ctx, entity);
     if (entity.type === 'spike') renderSpike(ctx, entity);
+    if (entity.type === 'powerUp') renderPowerUp(ctx, entity);
   }
 
   renderBee(ctx, state);

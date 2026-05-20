@@ -7,6 +7,7 @@ const LEADERBOARD_LIMIT = 10;
 const SCORE_PER_MS_LIMIT = 0.0135;
 const MIN_PICKUP_INTERVAL_MS = 300;
 const MAX_HONEY_POINTS = 75;
+const MAX_BONUS_PER_SECOND = 38;
 
 interface StoredLeaderboardEntry extends Omit<LeaderboardEntry, 'rank'> {
   id: string;
@@ -24,7 +25,8 @@ function maxPossibleScore(payload: ScorePayload): number {
   const distanceLimit = payload.elapsedMs * SCORE_PER_MS_LIMIT;
   const maxPickups = Math.floor(payload.elapsedMs / MIN_PICKUP_INTERVAL_MS) + 4;
   const honeyLimit = maxPickups * MAX_HONEY_POINTS;
-  return Math.ceil(distanceLimit + honeyLimit);
+  const bonusLimit = Math.ceil((payload.elapsedMs / 1000) * MAX_BONUS_PER_SECOND) + maxPickups * 42 + 80;
+  return Math.ceil(distanceLimit + honeyLimit + bonusLimit);
 }
 
 export function validateScorePayload(payload: unknown): payload is ScorePayload {
@@ -44,16 +46,21 @@ export function validateScorePayload(payload: unknown): payload is ScorePayload 
     candidate.distanceScore >= 0 &&
     candidate.distanceScore <= MAX_SCORE &&
     isIntegerScore(candidate.distanceScore) &&
+    isFiniteNumber(candidate.bonusScore) &&
+    candidate.bonusScore >= 0 &&
+    candidate.bonusScore <= MAX_SCORE &&
+    isIntegerScore(candidate.bonusScore) &&
     isFiniteNumber(candidate.elapsedMs) &&
     candidate.elapsedMs >= 0 &&
     candidate.elapsedMs <= MAX_ELAPSED_MS &&
     isIntegerScore(candidate.elapsedMs)
   ) {
     const typedCandidate = candidate as unknown as ScorePayload;
-    const expectedScore = typedCandidate.honeyScore + typedCandidate.distanceScore;
+    const expectedScore = typedCandidate.honeyScore + typedCandidate.distanceScore + typedCandidate.bonusScore;
     return (
       Math.abs(typedCandidate.score - expectedScore) <= 2 &&
       typedCandidate.honeyScore <= typedCandidate.score &&
+      typedCandidate.bonusScore <= typedCandidate.score &&
       typedCandidate.score <= maxPossibleScore(typedCandidate)
     );
   }
@@ -65,6 +72,10 @@ function leaderboardKey(): string {
   return `leaderboard:${context.postId ?? 'global'}`;
 }
 
+function safeInteger(value: unknown): number {
+  return isFiniteNumber(value) ? Math.max(0, Math.floor(value)) : 0;
+}
+
 function parseLeaderboardMember(member: string, score: number, index: number): LeaderboardEntry | null {
   try {
     const parsed = JSON.parse(member) as StoredLeaderboardEntry;
@@ -72,10 +83,11 @@ function parseLeaderboardMember(member: string, score: number, index: number): L
       rank: index + 1,
       score: Math.floor(score),
       username: parsed.username || 'anonymous',
-      honeyScore: Math.max(0, Math.floor(parsed.honeyScore)),
-      distanceScore: Math.max(0, Math.floor(parsed.distanceScore)),
-      elapsedMs: Math.max(0, Math.floor(parsed.elapsedMs)),
-      createdAt: Math.max(0, Math.floor(parsed.createdAt)),
+      honeyScore: safeInteger(parsed.honeyScore),
+      distanceScore: safeInteger(parsed.distanceScore),
+      bonusScore: safeInteger(parsed.bonusScore),
+      elapsedMs: safeInteger(parsed.elapsedMs),
+      createdAt: safeInteger(parsed.createdAt),
     };
   } catch {
     return null;
@@ -109,6 +121,7 @@ export async function acceptScore(payload: unknown): Promise<ScoreResponse> {
     username,
     honeyScore: payload.honeyScore,
     distanceScore: payload.distanceScore,
+    bonusScore: payload.bonusScore,
     elapsedMs: payload.elapsedMs,
     createdAt,
   };

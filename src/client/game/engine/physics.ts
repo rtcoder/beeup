@@ -1,22 +1,31 @@
 import {
   DIFFICULTY_RAMP_MS,
+  COMBO_BONUS_MAX,
+  COMBO_BONUS_STEP,
+  COMBO_WINDOW_MS,
   GAME_HEIGHT,
   GAME_WIDTH,
   INITIAL_SPAWN_INTERVAL_MS,
   INITIAL_WORLD_SPEED,
+  MAGNET_DURATION_MS,
+  MAGNET_PULL_SPEED,
+  MAGNET_RADIUS,
   MAX_WORLD_SPEED,
   MAX_VERTICAL_GAP,
   MIN_SPAWN_INTERVAL_MS,
   MIN_VERTICAL_GAP,
+  NEAR_MISS_MARGIN,
+  NEAR_MISS_POINTS,
   PLAYER_SPEED,
   SCORE_PER_SECOND,
+  SHIELD_MAX_CHARGES,
   SPIKE_ROW_COOLDOWN_MS,
   TOUCH_FOLLOW_RATE,
   TOUCH_SNAP_DISTANCE,
 } from './constants';
 import { intersects } from './collision';
 import { spawnRow } from './spawning';
-import type { GameState, InputState, ScoreSnapshot } from './types';
+import type { GameState, InputState, Rect, ScoreSnapshot } from './types';
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
@@ -68,7 +77,23 @@ function hasRecentSpike(state: GameState): boolean {
 }
 
 function updateEntities(state: GameState, deltaSeconds: number): void {
+  const playerCenterX = state.player.x + state.player.width / 2;
+  const playerCenterY = state.player.y + state.player.height / 2;
+
   for (const entity of state.entities) {
+    if (state.magnetTimeMs > 0 && entity.type === 'honey') {
+      const entityCenterX = entity.x + entity.width / 2;
+      const entityCenterY = entity.y + entity.height / 2;
+      const dx = playerCenterX - entityCenterX;
+      const dy = playerCenterY - entityCenterY;
+      const distance = Math.hypot(dx, dy);
+      if (distance > 0 && distance < MAGNET_RADIUS) {
+        const pullDistance = Math.min(distance, MAGNET_PULL_SPEED * deltaSeconds);
+        entity.x += (dx / distance) * pullDistance;
+        entity.y += (dy / distance) * pullDistance;
+      }
+    }
+
     entity.y += (entity.speedY ?? state.worldSpeed) * deltaSeconds;
   }
 
@@ -95,23 +120,69 @@ function playerHitbox(state: GameState) {
   };
 }
 
+function entityHitbox(entity: { type: string; x: number; y: number; width: number; height: number }): Rect {
+  const inset = entity.type === 'spike' ? 3 : 2;
+  return {
+    x: entity.x + inset,
+    y: entity.y + inset,
+    width: entity.width - inset * 2,
+    height: entity.height - inset * 2,
+  };
+}
+
+function expandedRect(rect: Rect, margin: number): Rect {
+  return {
+    x: rect.x - margin,
+    y: rect.y - margin,
+    width: rect.width + margin * 2,
+    height: rect.height + margin * 2,
+  };
+}
+
+function collectHoney(state: GameState, points: number): void {
+  state.comboCount = state.comboTimerMs > 0 ? state.comboCount + 1 : 1;
+  state.comboTimerMs = COMBO_WINDOW_MS;
+
+  const comboBonus = Math.min(COMBO_BONUS_MAX, Math.max(0, state.comboCount - 1) * COMBO_BONUS_STEP);
+  state.honeyScore += points;
+  state.bonusScore += comboBonus;
+}
+
 function updateCollisions(state: GameState): boolean {
   const player = playerHitbox(state);
+  const nearMissZone = expandedRect(player, NEAR_MISS_MARGIN);
   let hitSpike = false;
 
   state.entities = state.entities.filter((entity) => {
-    const inset = entity.type === 'spike' ? 3 : 2;
-    const entityHitbox = {
-      x: entity.x + inset,
-      y: entity.y + inset,
-      width: entity.width - inset * 2,
-      height: entity.height - inset * 2,
-    };
+    const hitbox = entityHitbox(entity);
 
-    if (!intersects(player, entityHitbox)) return true;
+    if (entity.type === 'spike' && !entity.nearMissAwarded && !intersects(player, hitbox)) {
+      const hasNearMiss = intersects(nearMissZone, hitbox);
+      if (hasNearMiss) {
+        entity.nearMissAwarded = true;
+        state.bonusScore += NEAR_MISS_POINTS;
+      }
+    }
+
+    if (!intersects(player, hitbox)) return true;
 
     if (entity.type === 'honey') {
-      state.honeyScore += entity.points ?? 0;
+      collectHoney(state, entity.points ?? 0);
+      return false;
+    }
+
+    if (entity.type === 'powerUp') {
+      if (entity.powerUpType === 'shield') {
+        state.shieldCharges = Math.min(SHIELD_MAX_CHARGES, state.shieldCharges + 1);
+      }
+      if (entity.powerUpType === 'magnet') {
+        state.magnetTimeMs = Math.max(state.magnetTimeMs, MAGNET_DURATION_MS);
+      }
+      return false;
+    }
+
+    if (state.shieldCharges > 0) {
+      state.shieldCharges -= 1;
       return false;
     }
 
@@ -127,6 +198,9 @@ export function updateGame(state: GameState, input: InputState, deltaMs: number)
 
   const deltaSeconds = deltaMs / 1000;
   state.elapsedMs += deltaMs;
+  state.magnetTimeMs = Math.max(0, state.magnetTimeMs - deltaMs);
+  state.comboTimerMs = Math.max(0, state.comboTimerMs - deltaMs);
+  if (state.comboTimerMs === 0) state.comboCount = 0;
   state.cloudOffset = (state.cloudOffset + state.worldSpeed * 0.16 * deltaSeconds) % GAME_HEIGHT;
 
   updateDifficulty(state);
@@ -135,9 +209,10 @@ export function updateGame(state: GameState, input: InputState, deltaMs: number)
   updateSpawning(state, deltaMs);
 
   state.distanceScore += deltaSeconds * SCORE_PER_SECOND;
-  state.score = Math.floor(state.distanceScore + state.honeyScore);
+  const hitSpike = updateCollisions(state);
+  state.score = Math.floor(state.distanceScore + state.honeyScore + state.bonusScore);
 
-  return updateCollisions(state);
+  return hitSpike;
 }
 
 export function snapshotScore(state: GameState): ScoreSnapshot {
@@ -146,6 +221,10 @@ export function snapshotScore(state: GameState): ScoreSnapshot {
     bestScore: state.bestScore,
     honeyScore: Math.floor(state.honeyScore),
     distanceScore: Math.floor(state.distanceScore),
+    bonusScore: Math.floor(state.bonusScore),
     elapsedMs: Math.floor(state.elapsedMs),
+    shieldCharges: state.shieldCharges,
+    magnetTimeMs: Math.ceil(state.magnetTimeMs),
+    comboCount: state.comboCount,
   };
 }
