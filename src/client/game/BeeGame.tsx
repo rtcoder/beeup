@@ -228,14 +228,6 @@ export function BeeGame() {
             <strong>{score.bestScore}</strong>
           </div>
         </div>
-        {status === 'playing' && (score.shieldCharges > 0 || score.magnetTimeMs > 0 || score.comboCount > 1) && (
-          <div className="power-hud" aria-live="polite">
-            {score.shieldCharges > 0 && <span>Shield</span>}
-            {score.magnetTimeMs > 0 && <span>Magnet {Math.ceil(score.magnetTimeMs / 1000)}s</span>}
-            {score.comboCount > 1 && <span>Combo x{score.comboCount}</span>}
-          </div>
-        )}
-
         <div className="canvas-wrap">
           <canvas
             ref={canvasRef}
@@ -244,6 +236,11 @@ export function BeeGame() {
             height={GAME_HEIGHT}
             aria-label="Bee Up play field"
           />
+          <div className="power-hud" aria-live="polite" aria-label="Active bonuses">
+            {status === 'playing' && score.shieldCharges > 0 && <span>Shield</span>}
+            {status === 'playing' && score.magnetTimeMs > 0 && <span>Magnet {Math.ceil(score.magnetTimeMs / 1000)}s</span>}
+            {status === 'playing' && score.comboCount > 1 && <span>Combo x{score.comboCount}</span>}
+          </div>
 
           {status === 'menu' && (
             <div className="overlay">

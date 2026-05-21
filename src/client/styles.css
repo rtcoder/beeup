@@ -82,17 +82,25 @@ button:active {
 }
 
 .power-hud {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
   display: flex;
   flex-wrap: wrap;
+  align-items: start;
   gap: 6px;
+  max-width: calc(100% - 20px);
   min-height: 28px;
-  padding: 0 4px 8px;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .power-hud span {
   border: 1px solid rgba(35, 50, 58, 0.14);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 4px 14px rgba(26, 47, 58, 0.12);
   color: #243741;
   font-size: 0.78rem;
   font-weight: 900;
