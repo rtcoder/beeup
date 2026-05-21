@@ -1,6 +1,6 @@
 {
   "name": "bee-up",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,10 +14,10 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@devvit/start": "^0.12.24",
-    "@devvit/web": "^0.12.24",
+    "@devvit/start": "0.12.24",
+    "@devvit/web": "0.12.24",
     "@hono/node-server": "^2.0.3",
-    "devvit": "^0.12.24",
+    "devvit": "0.12.24",
     "hono": "^4.12.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -32,5 +32,6 @@
     "globals": "^16.0.0",
     "typescript": "^5.8.0",
     "typescript-eslint": "^8.0.0"
-  }
+  },
+  "license": "BSD-3-Clause"
 }

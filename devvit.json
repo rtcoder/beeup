@@ -18,7 +18,9 @@
     "redis": true,
     "reddit": {
       "enable": true,
-      "asUser": ["SUBMIT_POST"]
+      "asUser": [
+        "SUBMIT_POST"
+      ]
     }
   },
   "menu": {
