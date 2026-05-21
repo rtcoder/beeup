@@ -1,6 +1,24 @@
 # Bee Up!
 
-Tiny Reddit Devvit Web game prototype built with React, TypeScript, Vite, and Canvas 2D.
+Bee Up! is a tiny arcade game for Reddit posts. You guide a bee through a bright sky, collect honey, grab helpful power-ups, and dodge dark thorns while the game gets faster.
+
+The game is designed for short, replayable sessions directly inside a Reddit custom post. It works with keyboard controls on desktop and drag controls on touch devices.
+
+## What Players Do
+
+- Move the bee left and right.
+- Collect small, large, and golden honey.
+- Pick up shields to survive one thorn hit.
+- Pick up magnets to pull nearby honey toward the bee.
+- Keep honey streaks alive for combo bonuses.
+- Fly close to thorns for near-miss bonus points.
+- Try to reach the top of the leaderboard.
+
+## Community And Data
+
+Bee Up! stores leaderboard entries with Devvit Redis so players can compare scores on a post. A submitted score includes the final score, honey points, distance points, bonus points, elapsed time, and the Reddit username returned by Devvit.
+
+The app does not use external analytics, ads, or third-party asset servers. Game visuals are drawn locally with Canvas 2D.
 
 ## Current MVP
 
@@ -10,10 +28,12 @@ Tiny Reddit Devvit Web game prototype built with React, TypeScript, Vite, and Ca
 - pointer/touch drag controls
 - lane-based honey and thorn spawning
 - small, large, and golden honey variants
+- shield and magnet power-ups
+- combo and near-miss bonus scoring
 - top-down bee rendering with animated wings
 - canvas-drawn thorn obstacles
 - AABB collisions
-- time and honey score
+- time, honey, and bonus score
 - local best score
 - Redis-backed leaderboard in Devvit
 - lightweight haptic feedback for honey and game over where supported
@@ -22,13 +42,23 @@ Tiny Reddit Devvit Web game prototype built with React, TypeScript, Vite, and Ca
 
 ## Gameplay
 
-The bee stays in the lower part of the canvas while the world scrolls downward. Survive as long as possible, collect honey, and dodge thorns.
+The bee stays in the lower part of the canvas while the world scrolls downward. Survive as long as possible, collect honey, use power-ups, and dodge thorns.
 
 Honey variants:
 
 - small honey: `15` points
 - large honey: `35` points
 - golden honey: `75` points
+
+Power-ups:
+
+- shield: absorbs one thorn hit
+- magnet: temporarily pulls nearby honey toward the bee
+
+Bonuses:
+
+- honey collected in quick succession builds a combo
+- close thorn dodges award a near-miss bonus
 
 The game uses a fixed internal playfield of `390 x 700` and scales the canvas responsively for desktop and mobile.
 
@@ -87,6 +117,6 @@ Scores are stored in Devvit Redis sorted sets. The leaderboard is scoped by `con
 Score submissions are intentionally conservative:
 
 - all score fields must be finite non-negative integers
-- final score must match `honeyScore + distanceScore` within a small rounding tolerance
+- final score must match `honeyScore + distanceScore + bonusScore` within a small rounding tolerance
 - elapsed time is capped at ten minutes
-- max possible score is capped by elapsed time plus a generous honey pickup allowance
+- max possible score is capped by elapsed time plus generous honey and bonus allowances
